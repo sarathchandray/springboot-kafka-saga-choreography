@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OrderEvent {
+public class PaymentEvent {
 
 	private CustomerOrder order;
 	private String type;

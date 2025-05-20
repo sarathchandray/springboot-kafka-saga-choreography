@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.visraj</groupId>
+	    <groupId>com.visraj</groupId>
 	    <artifactId>springboot-kafka-saga-choreography</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>domain_objects</artifactId>
 	<name>domain_objects</name>
@@ -31,6 +31,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+			
 		</dependency>
 
 		<dependency>
