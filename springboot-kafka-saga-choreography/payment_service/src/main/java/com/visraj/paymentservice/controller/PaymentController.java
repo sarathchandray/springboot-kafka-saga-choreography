@@ -44,7 +44,7 @@ public class PaymentController {
 		payment.setStatus("Success");
 		
 		try {
-			if(!"online".equalsIgnoreCase(payment.getMode())) {
+			if(!"online".equalsIgnoreCase(order.getPaymentMode())) {
 				throw new RuntimeException(String.format("Payment method %s is not supported!", payment.getMode()));
 			}
 			
@@ -56,6 +56,8 @@ public class PaymentController {
 			
 			paymentKafkaTemplate.send("new-payments", paymentEvent);
 			
+			LOGGER.info("New payment is placed in topic : %s" , paymentEvent);
+
 		} catch (Exception e) {
 			
 			LOGGER.error(String.format("Exception during processPayment() : %s", e.getMessage()));
@@ -66,7 +68,7 @@ public class PaymentController {
 			OrderEvent orderEvt = new OrderEvent();
 			orderEvt.setOrder(order);
 			orderEvt.setType("ORDER_REVERSED");
-			orderKafkaTemplate.send("reversed-orders", orderEvent);
+			orderKafkaTemplate.send("reversed-orders", orderEvt);
 		}	
 		
 	}

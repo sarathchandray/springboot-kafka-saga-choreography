@@ -45,7 +45,10 @@ public class OrderController {
 			orderEvent.setOrder(customerOrder);
 			orderEvent.setType("ORDER_CREATED");
 			
-			kafkaTemplate.send("new-order", orderEvent);
+			kafkaTemplate.send("new-orders", orderEvent);
+			
+			LOGGER.info("New Order is placed in topic : %s" , orderEvent);
+			
 			
 		} catch (Exception e) {
 

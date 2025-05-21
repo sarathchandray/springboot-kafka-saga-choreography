@@ -24,7 +24,7 @@ public class ReverseOrder {
 	@KafkaListener(topics = "reversed-orders", groupId = "orders-group")
 	public void reverseOrder(String event) throws Exception {
 		
-		LOGGER.info("Reverse order event %s", event);
+		LOGGER.info(String.format("Reverse order event %s", event));
 		
 		try {
 			OrderEvent orderEvent = new ObjectMapper().readValue(event, OrderEvent.class);
