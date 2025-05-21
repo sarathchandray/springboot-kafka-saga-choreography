@@ -14,7 +14,7 @@ public class Payment {
 	@Id
 	@GeneratedValue
 	private Long id;
-	private Long mode;
+	private String mode;
 	private Long orderId;
 	private double amount;
 	private String status;

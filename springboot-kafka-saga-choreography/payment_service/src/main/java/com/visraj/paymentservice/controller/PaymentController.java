@@ -40,7 +40,7 @@ public class PaymentController {
 		Payment payment = new Payment();
 		payment.setOrderId(order.getOrderId());
 		payment.setAmount(order.getAmount());
-		payment.setMode(order.getPaymentMethod());
+		payment.setMode(order.getPaymentMode());
 		payment.setStatus("Success");
 		
 		try {
