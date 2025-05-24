@@ -1,13 +1,13 @@
-package com.visraj.basedomains;
+package com.visraj.domainobjects;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BaseDomainsApplication {
+public class DomainObjectsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BaseDomainsApplication.class, args);
+		SpringApplication.run(DomainObjectsApplication.class, args);
 	}
 
 }

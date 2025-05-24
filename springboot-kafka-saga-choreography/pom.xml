@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version> <!-- Use your desired Spring Boot version -->
+        <version>3.5.0</version> <!-- Use your desired Spring Boot version -->
         <relativePath/> <!-- Ensures it's fetched from the repository -->
     </parent>
 
@@ -33,7 +33,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.2.5</version>
+                <version>3.5.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -72,5 +72,6 @@
     	<module>
     		payment_service
     	</module>
+    	<module>service-registry</module>
     </modules>
 </project>

@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +17,7 @@ import com.visraj.orderservice.entity.Order;
 import com.visraj.orderservice.repository.OrderRepository;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("")
 public class OrderController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
@@ -27,7 +29,7 @@ public class OrderController {
 	KafkaTemplate<String, OrderEvent> kafkaTemplate;
 	
 	@PostMapping("/orders")
-	public void createOrder(@RequestBody CustomerOrder customerOrder) {
+	public String createOrder(@RequestBody CustomerOrder customerOrder) {
 		
 		Order order = new Order();
 		order.setAmount(customerOrder.getAmount());
@@ -58,5 +60,22 @@ public class OrderController {
 			orderRepository.save(order);
 		}	
 		
+		return "Order #"+customerOrder.getOrderId()+" is successfully created!";
+		
+	}
+	
+	@GetMapping("/orders/{orderId}")
+	public CustomerOrder getOrderById(@PathVariable("orderId") String id) {
+		LOGGER.info("++ getOrderById() : " + id);
+		return orderRepository.findById(Long.valueOf(id)).map(
+					order -> {
+						CustomerOrder customerOrder = new CustomerOrder();
+						customerOrder.setOrderId(order.getId());
+						customerOrder.setItem(order.getItem());
+						customerOrder.setAmount(order.getAmount());
+						customerOrder.setQuantity(order.getQuantity());
+						return customerOrder;
+					}
+				).orElse(new CustomerOrder());
 	}
 }

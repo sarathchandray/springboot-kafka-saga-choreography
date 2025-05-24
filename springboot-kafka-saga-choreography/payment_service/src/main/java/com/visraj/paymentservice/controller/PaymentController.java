@@ -4,19 +4,21 @@ package com.visraj.paymentservice.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visraj.domainobjects.dto.CustomerOrder;
-import com.visraj.domainobjects.events.dto.OrderEvent;
-import com.visraj.domainobjects.events.dto.PaymentEvent;
+import com.visraj.paymentservice.client.OrderClient;
 import com.visraj.paymentservice.entity.Payment;
 import com.visraj.paymentservice.repository.PaymentRepository;
 
-@Controller
-public class PaymentController {
+@RestController
+@RequestMapping("/api")
+class PaymentController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PaymentController.class);
 
@@ -24,52 +26,28 @@ public class PaymentController {
 	private PaymentRepository paymentRepository;
 	
 	@Autowired
-	KafkaTemplate<String, PaymentEvent> paymentKafkaTemplate;
+	private OrderClient orderClient;
 	
 	@Autowired
-	KafkaTemplate<String, OrderEvent> orderKafkaTemplate;
-
-	@KafkaListener(topics = "new-orders", groupId = "orders-group")
-	public void processPayment(String event) throws Exception {
+	private WebClient webClient;
+	
+	@GetMapping("/payments/{payId}")
+	public ResponseEntity<CustomerOrder> getOrderDetailsByPaymentId(@PathVariable("payId") Long payId) {
 		
-		LOGGER.info(String.format("Process payment event : %s", event));
+		CustomerOrder customerOrder = new CustomerOrder();
 		
-		OrderEvent orderEvent = new ObjectMapper().readValue(event, OrderEvent.class);
-		CustomerOrder order = orderEvent.getOrder();
+		Payment payment = paymentRepository .findById(payId).get();
+		if(payment != null) {
+			LOGGER.info("payment.getOrderId() " + payment.getOrderId());
+			//customerOrder = orderClient.getOrderById(String.valueOf(payment.getOrderId()));
+			
+			// Using WebClient
+	        customerOrder = webClient.get().uri("/orders/" + String.valueOf(payment.getOrderId())).retrieve()
+	        		.bodyToMono(CustomerOrder.class).block();
+		}
 		
-		Payment payment = new Payment();
-		payment.setOrderId(order.getOrderId());
-		payment.setAmount(order.getAmount());
-		payment.setMode(order.getPaymentMode());
-		payment.setStatus("Success");
-		
-		try {
-			if(!"online".equalsIgnoreCase(order.getPaymentMode())) {
-				throw new RuntimeException(String.format("Payment method %s is not supported!", payment.getMode()));
-			}
-			
-			paymentRepository.save(payment);
-			
-			PaymentEvent paymentEvent = new PaymentEvent();
-			paymentEvent.setOrder(order);
-			paymentEvent.setType("PAYMENT_CREATED");
-			
-			paymentKafkaTemplate.send("new-payments", paymentEvent);
-			
-			LOGGER.info("New payment is placed in topic : %s" , paymentEvent);
-
-		} catch (Exception e) {
-			
-			LOGGER.error(String.format("Exception during processPayment() : %s", e.getMessage()));
-			
-			payment.setStatus("Failed");
-			paymentRepository.save(payment);
-			
-			OrderEvent orderEvt = new OrderEvent();
-			orderEvt.setOrder(order);
-			orderEvt.setType("ORDER_REVERSED");
-			orderKafkaTemplate.send("reversed-orders", orderEvt);
-		}	
+		return ResponseEntity.ok(customerOrder);
 		
 	}
 }
+ 
