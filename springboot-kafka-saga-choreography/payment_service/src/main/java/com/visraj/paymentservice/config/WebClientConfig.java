@@ -1,6 +1,7 @@
 package com.visraj.paymentservice.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,21 +15,22 @@ import com.visraj.paymentservice.client.OrderClient;
 public class WebClientConfig {
 
 
-	@Autowired
-	private LoadBalancedExchangeFilterFunction  loadBalancedExchangeFilterFunction;
+//	@Autowired
+//	private LoadBalancedExchangeFilterFunction  loadBalancedExchangeFilterFunction;
 	
 	//configuration for webclient that will be pointing to order_service
 	
 	@Bean
-	public WebClient orderWebClient() {
-		
-		return WebClient
-			.builder()
-			//lookup in service_registry
-			.baseUrl("http://order_service")
-			.filter(loadBalancedExchangeFilterFunction)
-			.build();
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+	    return WebClient.builder();
 	}
+
+	@Bean
+	public WebClient orderWebClient(WebClient.Builder loadBalancedWebClientBuilder) {
+	    return loadBalancedWebClientBuilder.build();
+	}
+
 	
 	
 	@Bean
@@ -39,6 +41,7 @@ public class WebClientConfig {
 
         return factory.createClient(OrderClient.class);
     }
+	
 	
 	
 }

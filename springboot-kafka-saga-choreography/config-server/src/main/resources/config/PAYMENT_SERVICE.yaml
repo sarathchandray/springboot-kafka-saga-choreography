@@ -1,21 +1,19 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: orders-group
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
+  datasource:
+    url: jdbc:h2:mem:paymentsdb
   h2:
     console:
       enabled: true
-
-  datasource:
-    url: jdbc:h2:mem:ordersdb
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: payments-group
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 eureka:
   client:
@@ -28,3 +26,10 @@ management:
   tracing:
     sampling:
       probability: 1.0
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web.reactive.function.client: TRACE
+    reactor.netty.http.client: DEBUG
+    org.springframework.cloud.client.loadbalancer: DEBUG

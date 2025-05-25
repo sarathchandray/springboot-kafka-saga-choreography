@@ -49,12 +49,12 @@ public class OrderController {
 			
 			kafkaTemplate.send("new-orders", orderEvent);
 			
-			LOGGER.info("New Order is placed in topic : %s" , orderEvent);
+			LOGGER.info(String.format("New Order is placed in topic : %s" , orderEvent));
 			
 			
 		} catch (Exception e) {
 
-			LOGGER.info("OrderController : %s" , e.getMessage());
+			LOGGER.info(String.format("OrderController : %s" , e.getMessage()));
 
 			order.setStatus("Failed");
 			orderRepository.save(order);
