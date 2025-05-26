@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visraj.domainobjects.dto.CustomerOrder;
@@ -15,8 +16,16 @@ import com.visraj.domainobjects.events.dto.PaymentEvent;
 import com.visraj.paymentservice.entity.Payment;
 import com.visraj.paymentservice.repository.PaymentRepository;
 
+import reactor.core.publisher.Mono;
+
 @Controller
 public class PaymentService {
+	
+	private final WebClient webClient;
+
+    public PaymentService(WebClient.Builder builder) {
+        this.webClient = builder.build();
+    }
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PaymentService.class);
 
@@ -28,6 +37,14 @@ public class PaymentService {
 	
 	@Autowired
 	KafkaTemplate<String, OrderEvent> orderKafkaTemplate;
+	
+	
+	public Mono<CustomerOrder> getOrder(Long orderId) {
+        return webClient.get()
+                .uri("http://ORDER_SERVICE/orders/{id}", orderId)
+                .retrieve()
+                .bodyToMono(CustomerOrder.class);
+    }
 
 	@KafkaListener(topics = "new-orders", groupId = "orders-group")
 	public void processPayment(String event) throws Exception {

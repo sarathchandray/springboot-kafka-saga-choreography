@@ -3,6 +3,7 @@ package com.visraj.orderservice.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +18,7 @@ import com.visraj.orderservice.entity.Order;
 import com.visraj.orderservice.repository.OrderRepository;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/orders")
 public class OrderController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
@@ -28,7 +29,7 @@ public class OrderController {
 	@Autowired
 	KafkaTemplate<String, OrderEvent> kafkaTemplate;
 	
-	@PostMapping("/orders")
+	@PostMapping("/create")
 	public String createOrder(@RequestBody CustomerOrder customerOrder) {
 		
 		Order order = new Order();
@@ -64,18 +65,27 @@ public class OrderController {
 		
 	}
 	
-	@GetMapping("/orders/{orderId}")
-	public CustomerOrder getOrderById(@PathVariable("orderId") String id) {
-		LOGGER.info("++ getOrderById() : " + id);
-		return orderRepository.findById(Long.valueOf(id)).map(
-					order -> {
-						CustomerOrder customerOrder = new CustomerOrder();
-						customerOrder.setOrderId(order.getId());
-						customerOrder.setItem(order.getItem());
-						customerOrder.setAmount(order.getAmount());
-						customerOrder.setQuantity(order.getQuantity());
-						return customerOrder;
-					}
-				).orElse(new CustomerOrder());
+	@GetMapping("/{orderId}")
+	public ResponseEntity<CustomerOrder> getOrderById(@PathVariable("orderId") Long id) {
+	    LOGGER.info("++ getOrderById() : " + id);
+	    return orderRepository.findById(id)
+	        .map(order -> {
+	            CustomerOrder customerOrder = new CustomerOrder();
+	            customerOrder.setOrderId(order.getId());
+	            customerOrder.setItem(order.getItem());
+	            customerOrder.setAmount(order.getAmount());
+	            customerOrder.setQuantity(order.getQuantity());
+	            return ResponseEntity.ok(customerOrder);
+	        })
+	        .orElse(ResponseEntity.notFound().build());
 	}
+	
+	
+	@GetMapping("/greet")
+	public String greet() {
+		return "Hello!!";
+	}
+	
+
+
 }

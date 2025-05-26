@@ -8,5 +8,5 @@ import com.visraj.paymentservice.entity.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-	//public List<Payment> findByOrderId(long orderId);
+	public List<Payment> findByOrderId(long orderId);
 }

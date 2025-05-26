@@ -4,9 +4,11 @@ server:
 spring:
   datasource:
     url: jdbc:h2:mem:ordersdb
+
   h2:
     console:
       enabled: true
+
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
@@ -20,7 +22,12 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    com.visraj.controller: DEBUG
+    root: INFO
 
 management:
   tracing:
