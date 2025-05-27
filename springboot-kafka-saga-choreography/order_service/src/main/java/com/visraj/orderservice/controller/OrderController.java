@@ -18,7 +18,7 @@ import com.visraj.orderservice.entity.Order;
 import com.visraj.orderservice.repository.OrderRepository;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api")
 public class OrderController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
@@ -65,7 +65,7 @@ public class OrderController {
 		
 	}
 	
-	@GetMapping("/{orderId}")
+	@GetMapping("/get/{orderId}")
 	public ResponseEntity<CustomerOrder> getOrderById(@PathVariable("orderId") Long id) {
 	    LOGGER.info("++ getOrderById() : " + id);
 	    return orderRepository.findById(id)

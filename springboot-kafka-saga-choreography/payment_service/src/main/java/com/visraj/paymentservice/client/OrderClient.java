@@ -7,7 +7,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 
 import com.visraj.domainobjects.dto.CustomerOrder;
 
-@HttpExchange
+@HttpExchange("/orders")
 public interface OrderClient {
 
 	@GetExchange("/{orderId}")

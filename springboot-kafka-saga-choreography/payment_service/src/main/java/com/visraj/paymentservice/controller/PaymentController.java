@@ -20,7 +20,7 @@ import com.visraj.paymentservice.service.PaymentService;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/api")
 class PaymentController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PaymentController.class);
@@ -34,10 +34,7 @@ class PaymentController {
 	@Autowired
 	private OrderClient orderClient;
 
-	@Autowired
-	private RestTemplate restTemplate;
-
-	@GetMapping("/{payId}")
+	@GetMapping("/orderByPayId/{payId}")
 	public ResponseEntity<CustomerOrder> getOrderDetailsByPaymentId(@PathVariable("payId") Long payId) {
 		return paymentRepository.findById(payId).map(p -> {
 			LOGGER.info("payment.getOrderId() " + p.getOrderId());
@@ -46,20 +43,29 @@ class PaymentController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/order/{id}")
-	public Mono<CustomerOrder> getOrderDetails(@PathVariable Long id) {
-		return paymentService.getOrder(id);
-	}
+//	@GetMapping("/order/{id}")
+//	public Mono<CustomerOrder> getOrderDetails(@PathVariable Long id) {
+//		return paymentService.getOrder(id);
+//	}
 
-	@GetMapping("/orders/{payId}")
+	
+	// using restTemplate
+	
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	@GetMapping("/order/get/{payId}")
 	public ResponseEntity<CustomerOrder> getOrderDtails(@PathVariable("payId") Long payId) {
 		return paymentRepository.findById(payId).map(p -> {
 			LOGGER.info("payment.getOrderId() " + p.getOrderId());
-			CustomerOrder customerOrder = restTemplate.getForObject("http://order-service/orders/" + p.getOrderId(),
+			CustomerOrder customerOrder = restTemplate.getForObject("http://order-service/api/get/" + p.getOrderId(),
 					CustomerOrder.class);
 			return ResponseEntity.ok(customerOrder);
 		}).orElse(ResponseEntity.notFound().build());
 	}
+	
+	
 	
 	@Autowired
 	private WebClient.Builder webClientBuilder;
@@ -67,11 +73,13 @@ class PaymentController {
 	@GetMapping("/orders/greet")
 	public String greetingFromOrder() {
 		
+		System.out.println("inside greetingFromOrder()...");
+		
 		return webClientBuilder
-	    //.baseUrl("http://order_service")
+	    .baseUrl("http://order_service")
 	    .build()
 	    .get()
-	    .uri("http://order-service/orders/greet")
+	    .uri("/orders/greet")
 	    .retrieve()
 	    .bodyToMono(String.class).block();
 		

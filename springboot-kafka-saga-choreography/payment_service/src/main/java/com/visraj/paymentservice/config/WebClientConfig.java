@@ -26,7 +26,7 @@ public class WebClientConfig {
     }
 
     @Bean
-    public OrderClient orderClient(WebClient.Builder builder) {
+    public OrderClient orderClient() {
         
         HttpServiceProxyFactory factory = HttpServiceProxyFactory
                 .builderFor(WebClientAdapter.create(orderWebClient()))
