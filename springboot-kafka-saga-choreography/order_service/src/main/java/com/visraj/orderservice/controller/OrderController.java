@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.visraj.domainobjects.dto.CustomerOrder;
 import com.visraj.domainobjects.events.dto.OrderEvent;
 import com.visraj.orderservice.entity.Order;
+import com.visraj.orderservice.kafka.OrderProducer;
 import com.visraj.orderservice.repository.OrderRepository;
 
 @RestController
@@ -27,7 +28,7 @@ public class OrderController {
 	OrderRepository orderRepository;
 	
 	@Autowired
-	KafkaTemplate<String, OrderEvent> kafkaTemplate;
+	OrderProducer orderProducer;
 	
 	@PostMapping("/create")
 	public String createOrder(@RequestBody CustomerOrder customerOrder) {
@@ -48,10 +49,7 @@ public class OrderController {
 			orderEvent.setOrder(customerOrder);
 			orderEvent.setType("ORDER_CREATED");
 			
-			kafkaTemplate.send("new-orders", orderEvent);
-			
-			LOGGER.info(String.format("New Order is placed in topic : %s" , orderEvent));
-			
+			orderProducer.sendMessage(orderEvent);
 			
 		} catch (Exception e) {
 

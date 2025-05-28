@@ -10,6 +10,8 @@ spring:
       enabled: true
 
   kafka:
+    topic:
+      name: new-orders
     bootstrap-servers: localhost:9092
     consumer:
       group-id: orders-group
@@ -26,8 +28,8 @@ eureka:
 
 logging:
   level:
-    com.visraj.controller: DEBUG
     root: INFO
+    com.visraj.controller: DEBUG
 
 management:
   tracing:

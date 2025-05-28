@@ -14,6 +14,8 @@ import com.visraj.domainobjects.dto.CustomerOrder;
 import com.visraj.domainobjects.events.dto.OrderEvent;
 import com.visraj.domainobjects.events.dto.PaymentEvent;
 import com.visraj.paymentservice.entity.Payment;
+import com.visraj.paymentservice.kafka.ReversedOrderProducer;
+import com.visraj.paymentservice.kafka.PaymentProducer;
 import com.visraj.paymentservice.repository.PaymentRepository;
 
 import reactor.core.publisher.Mono;
@@ -33,10 +35,16 @@ public class PaymentService {
 	private PaymentRepository paymentRepository;
 	
 	@Autowired
-	KafkaTemplate<String, PaymentEvent> paymentKafkaTemplate;
+	private PaymentProducer paymentProducer;
 	
 	@Autowired
-	KafkaTemplate<String, OrderEvent> orderKafkaTemplate;
+	private ReversedOrderProducer reversedOrderProducer;
+	
+//	@Autowired
+//	KafkaTemplate<String, PaymentEvent> paymentKafkaTemplate;
+	
+//	@Autowired
+//	KafkaTemplate<String, OrderEvent> orderKafkaTemplate;
 	
 	
 	public Mono<CustomerOrder> getOrder(Long orderId) {
@@ -46,12 +54,23 @@ public class PaymentService {
                 .bodyToMono(CustomerOrder.class);
     }
 
-	@KafkaListener(topics = "new-orders", groupId = "orders-group")
-	public void processPayment(String event) throws Exception {
+//  Consume as String using StringDeserializer
+//	@KafkaListener(topics = "${spring.kafka.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
+//	public void processPayment(String event) throws Exception {
+//		
+//		LOGGER.info(String.format("Process payment event : %s", event));
+//		
+//		OrderEvent orderEvent = new ObjectMapper().readValue(event, OrderEvent.class);
+//		CustomerOrder order = orderEvent.getOrder();
+
+	
+	// Consume as Object using JsonDeserializer
+	@KafkaListener(topics = "${spring.kafka.consumer.order.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
+	public void processPayment(OrderEvent orderEvent ) throws Exception {
 		
-		LOGGER.info(String.format("Process payment event : %s", event));
+		LOGGER.info(String.format("Process payment event : %s", orderEvent));
 		
-		OrderEvent orderEvent = new ObjectMapper().readValue(event, OrderEvent.class);
+//		OrderEvent orderEvent = new ObjectMapper().readValue(event, OrderEvent.class);
 		CustomerOrder order = orderEvent.getOrder();
 		
 		Payment payment = new Payment();
@@ -71,7 +90,9 @@ public class PaymentService {
 			paymentEvent.setOrder(order);
 			paymentEvent.setType("PAYMENT_CREATED");
 			
-			paymentKafkaTemplate.send("new-payments", paymentEvent);
+			//paymentKafkaTemplate.send("new-payments", paymentEvent);
+			
+			paymentProducer.sendMessage(paymentEvent);
 			
 			LOGGER.info(String.format("New payment is placed in topic : %s" , paymentEvent));
 
@@ -85,7 +106,10 @@ public class PaymentService {
 			OrderEvent orderEvt = new OrderEvent();
 			orderEvt.setOrder(order);
 			orderEvt.setType("ORDER_REVERSED");
-			orderKafkaTemplate.send("reversed-orders", orderEvt);
+			
+			reversedOrderProducer.sendMessage(orderEvt);
+			//orderKafkaTemplate.send("reversed-orders", orderEvt);
+			
 		}	
 		
 	}
